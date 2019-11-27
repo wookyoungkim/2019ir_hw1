@@ -1,0 +1,78 @@
+#include <iostream>
+#include <fstream>
+#include "dictionary.h"
+
+using namespace std;
+
+struct Line{
+    Line(): capacity(8), numposts(0)
+        { pArray = new Posting[capacity];}
+    void Print();
+    void NewWord(string wd){
+        word = wd; numposts=0;
+    }
+    void NewPosting(Posting);
+
+    string word;
+    int totalfreq;
+    int numposts;
+    int capacity;
+    Posting *pArray;
+};
+
+//line implementation follows
+
+void Line::NewPosting(Posting pst){
+    if(numposts==capacity){
+        ChangeSizeID(pArray, capacity, 2*capacity);
+        capacity*=2;
+    }
+    pArray[numposts++] = pst;
+}
+
+void Line::Print(){
+    totalfreq=0;
+    int i;
+    for(i=0; i< numposts; i++)
+        totalfreq += pArray[i].freq;
+    cout<<word<<" "<<numposts<<" "<<totalfreq<<" ";
+
+    for(i=0; i<numposts; i++)
+        cout<<" "<<pArray[i].docpos<<" "<<pArray[i].freq;
+    cout<<endl;
+}
+
+int main(){
+    Line line;
+    Posting pst; 
+    string word;
+    int docpos;
+
+    if(!(cin>>word>>pst.docpos)){
+        cerr<<"Empty input\n";
+        return 1;
+    }
+    line.NewWord(word);
+    pst.freq=1;
+
+    while(cin>>word>>docpos){
+        if(word!=line.word){
+            line.NewPosting(pst);
+            line.Print();
+            //start new line with new word
+            line.NewWord(word);
+            //insert new posting
+            pst.docpos = docpos;
+            pst.freq = 1;
+        }
+        else if(docpos!=pst.docpos){
+            line.NewPosting(pst);
+            //start new posting
+            pst.docpos = docpos;
+            pst.freq = 1;
+        }
+        else pst.freq++;
+    }
+    line.NewPosting(pst);
+    line.Print();
+}
